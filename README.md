@@ -2,7 +2,7 @@
 
 A C# Client for the Linql Language.  Allows you to use your api as if it were an IQueryable. 
 
-[Linql Overview](../../README.md)
+[Linql Overview](https://github.com/LinqlLang/Linql)
 
 ```cs
 LinqlContext Context = new LinqlContext("https://localhost:8080");
@@ -77,13 +77,13 @@ public class CustomLinqlContext : LinqlContext
 
 ## Full Example
 
-Checkout our full example [here](../Examples/ClientExample/).
+Checkout our full example [here](https://github.com/LinqlLang/CSharp.Linql.Examples).
 
 ## Development 
 
 - Visual Studio 2022 17.4
-- .Net 7
+- .Net 6
 
 ## Testing 
 
-Unit tests are located [here](../Test/Linql.Client.Test/).
+Unit tests are located [here](./Linql.Client.Test/).
