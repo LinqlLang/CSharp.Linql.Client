@@ -13,6 +13,10 @@ namespace Linql.Client
     /// </summary>
     public abstract class ALinqlContext : IQueryProvider
     {
+        /// <summary>
+        /// Determines whether or not Functions should be chained on .Next or in a Search's Expression List.
+        /// </summary>
+        public bool FlattenTopLevelFunctions { get; set; } = false;
 
         //#region IQueryProvider
         public IQueryable CreateQuery(Expression expression)
@@ -22,7 +26,14 @@ namespace Linql.Client
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
         {
-            return new LinqlSearch<TElement>(this, expression);
+            if (expression.Type == typeof(IOrderedQueryable<TElement>))
+            {
+                return new OrderedLinqlSearch<TElement>(this, expression);
+            }
+            else
+            {
+                return new LinqlSearch<TElement>(this, expression);
+            }
         }
 
         public object Execute(Expression expression)
@@ -67,7 +78,7 @@ namespace Linql.Client
         /// <returns>A nongeneric LinqlSearch</returns>
         public virtual LinqlSearch BuildLinqlRequest(Expression expression, Type RootType)
         {
-           
+            bool flatten = this.FlattenTopLevelFunctions;
             LinqlParser parser = new LinqlParser(expression);
 
             Type rootType = RootType;
@@ -87,7 +98,23 @@ namespace Linql.Client
                 {
                     search.Expressions = new List<LinqlExpression>();
                 }
-                search.Expressions.Add(root);
+
+                if (!flatten)
+                {
+                    search.Expressions.Add(root);
+                }
+                else
+                {
+                    var tempExpression = root;
+
+                    while(tempExpression != null)
+                    {
+                        search.Expressions.Add(tempExpression);
+                        var next = tempExpression.Next;
+                        tempExpression.Next = null;
+                        tempExpression = next;
+                    }
+                }
             }
 
             return search;

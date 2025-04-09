@@ -61,6 +61,18 @@ namespace Linql.Client
 
         public IQueryProvider Provider { get; private set; }
 
+        public ALinqlContext LinqlProvider 
+        { 
+            get
+            {
+                if(this.Provider is ALinqlContext context)
+                {
+                    return context;
+                }
+                return null;
+            } 
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             ALinqlContext provider = this.Provider as ALinqlContext;
@@ -74,6 +86,5 @@ namespace Linql.Client
         {
             throw new System.Exception("Typeless IEnumerator GetEnumerator method is not supported for LinqlSearches");
         }
-
     }
 }

@@ -91,21 +91,29 @@ namespace Linql.Client
             if (source.Provider is ALinqlContext linqlProvider)
             {
                 search = linqlProvider.BuildLinqlRequest(source.Expression, source.GetType().GetEnumerableType());
+                bool flatten = linqlProvider.FlattenTopLevelFunctions;
 
                 LinqlExpression expression = null;
-
-                if (search.Expressions != null)
-                {
-                    expression = search.Expressions.FirstOrDefault();
-                }
-
                 LinqlFunction customFunction = new LinqlFunction(FunctionName);
 
-                if (expression != null)
+                if (flatten)
                 {
-                    LinqlExpression lastExpression = expression.GetLastExpressionInNextChain();
-                    lastExpression.Next = customFunction;
+                    search.Expressions.Add(customFunction);
                 }
+                else
+                {
+                    if (search.Expressions != null)
+                    {
+                        expression = search.Expressions.FirstOrDefault();
+                    }
+
+                    if (expression != null)
+                    {
+                        LinqlExpression lastExpression = expression.GetLastExpressionInNextChain();
+                        lastExpression.Next = customFunction;
+                    }
+                }
+             
               
 
                 if (Predicate != null) 

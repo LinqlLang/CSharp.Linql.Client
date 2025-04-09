@@ -22,6 +22,9 @@ dotnet add package Linql.Client -v 1.0.0-alpha1
 
 ```cs
 LinqlContext Context = new LinqlContext("https://localhost:8080");
+
+//Optional: Change TopLevel functions to be flat, instead of chained through .Next
+Context.FlattenTopLevelFunctions = true;
 ```
 
 ### Start a Query
