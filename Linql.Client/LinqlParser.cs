@@ -312,5 +312,24 @@ namespace Linql.Client
 
             return m;
         }
+
+        protected override Expression VisitNew(NewExpression c)
+        {
+
+            LinqlAnonymousObject aType = new LinqlAnonymousObject();
+            int index = 0;
+            foreach (MemberInfo member in c.Members)
+            {
+                Expression arg = c.Arguments[index];
+                LinqlParser argParser = new LinqlParser(arg);
+                aType.AddProperty(member.Name, argParser.Root);
+                index++;
+            }
+
+            AttachToExpression(aType);
+            PushToStack(aType, c);
+
+            return c;
+        }
     }
 }

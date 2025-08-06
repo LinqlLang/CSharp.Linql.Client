@@ -100,5 +100,29 @@ namespace Linql.Client.Test.Expressions
                 List<DataModel> output = search.AsQueryable().ToList();
             });
         }
+
+        [Test]
+        public async Task AnonymousObject()
+        {
+            LinqlSearch<DataModel> search = Context.Set<DataModel>();
+            string output = await search.Select(r => new
+            {
+                Property1 = r.Boolean,
+                Property2 = r.Decimal
+            }).ToJsonAsync();
+            this.TestLoader.Compare(nameof(SimpleExpressions_Test.AnonymousObject), output);
+        }
+
+        [Test]
+        public async Task AnonymousObjectChained()
+        {
+            LinqlSearch<DataModel> search = Context.Set<DataModel>();
+            string output = await search.Select(r => new
+            {
+                Property1 = r.Boolean,
+                Property2 = r.Decimal
+            }.Property1).ToJsonAsync();
+            this.TestLoader.Compare(nameof(SimpleExpressions_Test.AnonymousObjectChained), output);
+        }
     }
 }
