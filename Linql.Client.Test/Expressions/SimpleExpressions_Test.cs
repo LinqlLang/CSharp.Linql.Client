@@ -5,7 +5,10 @@ namespace Linql.Client.Test.Expressions
 {
     public class SimpleExpressions_Test : TestFileTests
     {
-        protected LinqlContext Context { get; set; } = new LinqlContext(null, new JsonSerializerOptions() { WriteIndented = true });
+        protected LinqlContext Context { get; set; } = new LinqlContext(null, new JsonSerializerOptions() { 
+            WriteIndented = true, 
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull 
+        });
 
         protected override string TestFolder { get; set; } = "./SimpleExpressions";
 
@@ -105,13 +108,25 @@ namespace Linql.Client.Test.Expressions
         public async Task AnonymousObject()
         {
             LinqlSearch<DataModel> search = Context.Set<DataModel>();
-            string output = await search.Select(r => new
+
+            var search2 = search.Select(r => new
             {
                 Property1 = r.Boolean,
                 Property2 = r.Decimal
-            }).ToJsonAsync();
+            });
+
+            string output = await search2.ToJsonAsync();
             this.TestLoader.Compare(nameof(SimpleExpressions_Test.AnonymousObject), output);
         }
+
+        //Not implemented yet.  May not be possible
+        //[Test]
+        //public async Task AnonymousObjectConcreteType()
+        //{
+        //    LinqlSearch<DataModel> search = Context.Set<DataModel>();
+        //    string output = await search.Select(r => new TestProjection(r.Boolean, r.Decimal)).ToJsonAsync();
+        //    this.TestLoader.Compare(nameof(SimpleExpressions_Test.AnonymousObjectConcreteType), output);
+        //}
 
         [Test]
         public async Task AnonymousObjectChained()
@@ -123,6 +138,60 @@ namespace Linql.Client.Test.Expressions
                 Property2 = r.Decimal
             }.Property1).ToJsonAsync();
             this.TestLoader.Compare(nameof(SimpleExpressions_Test.AnonymousObjectChained), output);
+        }
+
+        [Test]
+        public async Task GroupBy()
+        {
+            LinqlSearch<DataModel> search = Context.Set<DataModel>();
+
+            string output = await search.GroupBy(r => r.Boolean).Select(r => new
+            {
+                key = r.Key,
+                count = r.Count()
+            }).ToJsonAsync();
+
+            this.TestLoader.Compare(nameof(SimpleExpressions_Test.GroupBy), output);
+        }
+
+        [Test]
+        public async Task GroupByString()
+        {
+            LinqlSearch<DataModel> search = Context.Set<DataModel>();
+
+            string output = await search.GroupBy(r => r.Boolean).Select(r => new
+            {
+                key = r.Key,
+                count = String.Join(",", r.Select(s => s.String))
+            }).ToJsonAsync();
+
+            this.TestLoader.Compare(nameof(SimpleExpressions_Test.GroupByString), output);
+        }
+
+        [Test]
+        public async Task MultipleQueries()
+        {
+            LinqlSearch<DataModel> search = Context.Set<DataModel>();
+            LinqlSearch<DataModel> search2 = Context.Set<DataModel>();
+
+            var innerQuery = search2.Select(r => r.Integer);
+
+            string output = await search.Where(r => search2.Select(s => s.Integer).Contains(r.Integer)).ToJsonAsync();
+
+            this.TestLoader.Compare(nameof(SimpleExpressions_Test.MultipleQueries), output);
+        }
+    }
+
+    class TestProjection
+    {
+        public bool Property1 { get; set; }
+
+        public decimal Property2 { get; set; }
+
+        public TestProjection(bool Property1, decimal Property2)
+        {
+            this.Property1 = Property1;
+            this.Property2 = Property2;
         }
     }
 }

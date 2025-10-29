@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Linql.Core" Version="1.0.0-*" />
+    <PackageReference Include="Linql.Core" Version="1.0.0-beta.*" />
   </ItemGroup>
   
   <ItemGroup>

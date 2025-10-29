@@ -281,7 +281,10 @@ namespace Linql.Client
                     if (value is LinqlObject obj)
                     {
                         expression = new LinqlObject(obj.Type, obj.Value);
-
+                    }
+                    else if(value is LinqlSearch search && value is IQueryable query)
+                    {
+                        expression = query.ToLinqlSearch();
                     }
                     else
                     {
