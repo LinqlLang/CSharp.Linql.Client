@@ -180,6 +180,20 @@ namespace Linql.Client.Test.Expressions
 
             this.TestLoader.Compare(nameof(SimpleExpressions_Test.MultipleQueries), output);
         }
+
+        [Test]
+        public async Task GroupByMinString()
+        {
+            LinqlSearch<DataModel> search = Context.Set<DataModel>();
+
+            string output = await search.GroupBy(r => r.Boolean).Select(r => new
+            {
+                key = r.Key,
+                minString = r.Min(s => s.String)
+            }).ToJsonAsync();
+
+            this.TestLoader.Compare(nameof(SimpleExpressions_Test.GroupByMinString), output);
+        }
     }
 
     class TestProjection
